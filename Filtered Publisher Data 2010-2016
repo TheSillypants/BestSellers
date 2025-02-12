@@ -1,0 +1,34 @@
+# Load required libraries
+library(dplyr)
+library(readr)
+
+# Read the dataset
+df <- read_csv("NYT_best_seller.csv")
+
+# Convert published_date to Date format
+df$published_date <- as.Date(df$published_date, format="%Y-%m-%d")
+
+# Filter data to only include books published between 2010 and 2016
+df_filtered <- df %>%
+  filter(published_date >= as.Date("2010-01-01") & published_date <= as.Date("2016-12-31"))
+
+# Count the number of books per publisher
+publisher_counts_2010_2016 <- df_filtered %>%
+  count(publisher, name = "n") %>%
+  arrange(desc(n))
+
+# Save filtered data
+write_csv(publisher_counts_2010_2016, "NYT_best_seller.csv")
+
+# Display filtered dataset
+print(head(publisher_counts_2010_2016))
+
+ggplot(publisher_counts_2010_2016, aes(x = reorder(publisher, n), y = n)) + 
+  geom_bar(stat = "identity", fill = "skyblue") + 
+  coord_flip() + 
+  labs(title = "Publisher Counts in NYT Best Sellers", 
+       subtitle = "Data from 2010-2016",
+       x = "Publisher",
+       y = "Number of Best Sellers") +
+  theme_minimal()
+```
