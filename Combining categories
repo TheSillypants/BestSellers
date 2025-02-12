@@ -1,1 +1,18 @@
+library(dplyr)
 
+# Read the dataset
+file_path <- "bestsellers_2_csv.csv" # Update with the correct path
+df <- read.csv(file_path, stringsAsFactors = FALSE)
+
+# Replace 'Trade Fiction Hardcover' and 'Trade Fiction Paperback' with 'Trade Fiction'
+df$list_name <- ifelse(df$list_name %in% c("Trade Fiction Hardcover", "Trade Fiction Paperback"), 
+                       "Trade Fiction", 
+                       df$list_name)
+
+# Summarize the changes
+summary_changes <- df %>%
+  group_by(list_name) %>%
+  summarise(count = n())
+
+# Print the summary
+print(summary_changes)
