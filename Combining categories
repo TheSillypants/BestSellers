@@ -11,12 +11,10 @@ df <- df %>%
   mutate(list_name = ifelse(list_name %in% c("Trade Fiction Hardcover", "Trade Fiction Paperback"), 
                             "Trade Fiction", list_name))
 
-# Save the cleaned dataset
+# Save 
 write.csv(df, "bestsellers_combined.csv", row.names = FALSE)
 
-# Print the first few rows
-head(df)
 
-# View the updated dataset
+head(df)
 View(df)
 ```
