@@ -1,0 +1,22 @@
+# Combine categories for "Trade Fiction Hardcover" and "Trade Fiction Paperback" into one category, "Trade Fiction" 
+```{r}
+library(dplyr) 
+
+# Read the CSV file
+file_path <- "bestsellers_2_csv.csv"
+df <- read.csv(file_path, stringsAsFactors = FALSE)
+
+# Standardize list_name by combining 'Trade Fiction Hardcover' and 'Trade Fiction Paperback'
+df <- df %>%
+  mutate(list_name = ifelse(list_name %in% c("Trade Fiction Hardcover", "Trade Fiction Paperback"), 
+                            "Trade Fiction", list_name))
+
+# Save the cleaned dataset
+write.csv(df, "bestsellers_combined.csv", row.names = FALSE)
+
+# Print the first few rows
+head(df)
+
+# View the updated dataset
+View(df)
+```
