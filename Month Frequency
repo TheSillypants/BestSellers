@@ -1,0 +1,41 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readr)
+library(dplyr)
+
+bestsellers <- read.csv("bestsellers 2010-2019 .csv")
+print(bestsellers)
+
+# Load necessary libraries
+library(tidyverse)
+library(lubridate)
+
+
+# Check the structure and a sample of the published_date column
+glimpse(bestsellers)
+head(bestsellers$published_date)
+
+# Convert published_date to Date format
+bestsellers$published_date <- mdy(bestsellers$published_date)  # Use mdy() for MM/DD/YY format
+
+# Extract only the month from the published_date column
+bestsellers$month <- format(bestsellers$published_date, "%m")  # Extracts as two-digit month
+
+# Count the frequency of books published in each month
+month_frequency <- bestsellers %>%
+  group_by(month) %>%
+  summarise(count = n()) %>%
+  arrange(desc(count))
+
+# Print the frequency table
+print(month_frequency)
+
+# Plot a bar chart of bestseller frequency by month
+ggplot(month_frequency, aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Frequency of Bestsellers by Month",
+       x = "Month",
+       y = "Number of Bestsellers") +
+  theme_minimal()
