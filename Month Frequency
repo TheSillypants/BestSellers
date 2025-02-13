@@ -38,4 +38,35 @@ ggplot(month_frequency, aes(x = month, y = count, fill = month)) +
   labs(title = "Frequency of Bestsellers by Month",
        x = "Month",
        y = "Number of Bestsellers") +
-  theme_minimal()
+  theme_minimal() 
+
+# DISTRIBUTION OF BESTSELLERS BASED ON MONTH/CATEGORIES
+
+updated_categories <- read.csv("Updated_Bestsellers_Data.csv")
+
+View(updated_categories)
+
+
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Load the updated dataset
+data <- read.csv("Updated_Bestsellers_Data.csv", stringsAsFactors = FALSE)
+
+# Convert the published_date column to Date format and extract the month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")  # full month name
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Create the visualization
+ggplot(data, aes(x = month, fill = New_Category)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(title = "Distribution of Bestsellers by Month",
+       x = "Month",
+       y = "Count of Bestsellers",
+       fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
