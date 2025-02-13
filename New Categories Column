@@ -1,0 +1,45 @@
+# Load necessary libraries
+library(dplyr)
+
+# Read the CSV file
+data <- read.csv("bestsellers 2010-2019.csv", stringsAsFactors = FALSE)
+
+# Define category mappings
+category_mappings <- list(
+  "Fiction" = c("Combined Print and E-Book Fiction", "Hardcover Fiction", "Audio Fiction",  
+                "Combined Print Fiction", "Trade Fiction Paperback", "E-Book Fiction", 
+                "Espionage", "Series Books"),
+  "Manga & Graphic Novels" = c("Hardcover Graphic Books", "Manga", "Paperback Graphic Books", "Graphic Books and Manga"),
+  "Nonfiction" = c("Hardcover Nonfiction", "Paperback Nonfiction", "Combined Print Nonfiction", 
+                   "E-Book Nonfiction", "Combined Print and E-Book Nonfiction", "Race and Civil Rights", 
+                   "Hardcover Political Books", "Science", "Audio Nonfiction", "Sports", "Celebrities", 
+                   "Travel", "Expeditions Disasters and Adventures", "Indigenous Americans", "Culture"),
+  "Younger Audiences" = c("Picture Books", "Chapter Books", "Young Adult", "Childrens Middle Grade", 
+                          "Middle Grade Paperback Monthly", "Young Adult Paperback Monthly", 
+                          "Childrens Middle Grade E-Book", "Childrens Middle Grade Hardcover", 
+                          "Childrens Middle Grade Paperback", "Young Adult E-Book", "Young Adult Hardcover", 
+                          "Young Adult Paperback"),
+  "Self-Improvement" = c("Hardcover Advice", "Paperback Advice", "Advice How-To and Miscellaneous", 
+                         "Relationships", "Religion Spirituality and Faith", "Paperback Business Books", 
+                         "Food and Fitness", "Business Books", "Fashion Manners and Customs", 
+                         "Family", "Health", "Education"),
+  "Other" = c("Mass Market Paperback", "Mass Market Monthly", "Humor", "Paperback Books", "Games and Activities", 
+              "Crime and Punishment", "Animals")
+)
+
+# Function to assign categories
+assign_category <- function(list_name) {
+  for (category in names(category_mappings)) {
+    if (list_name %in% category_mappings[[category]]) {
+      return(category)
+    }
+  }
+  return("Uncategorized")
+}
+
+# Apply category assignment to data
+data$New_Category <- sapply(data$list_name, assign_category)
+
+# Display the updated dataset
+
+View(data)
