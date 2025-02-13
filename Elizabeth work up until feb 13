@@ -1,0 +1,49 @@
+---
+title: "Best Seller"
+author: "Elizabeth Techeira"
+date: "2025-02-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, inserting packages}
+library(tidyverse)
+data <- read.csv("bestsellers.csv")
+print(data)
+```
+```{r, cleaning data underneath list name}
+categories <- unique(data$list_name)
+all_catergories <- length(categories)
+data.frame(categories)
+write.csv(categories, "~/Desktop/categories.csv")
+```
+* importing a sorted document at some point 
+```{r, grouping the categories into larger categories}
+fiction <- "bestsellers.csv"[data$list_name %in% 
+                               c("Combined Print and E-Book Fiction","Hardcover Fiction", "Audio Fiction",  "Combined Print Fiction", "Trade Fiction Paperback", "Combined Print Fiction", "E-Book Fiction", "Espionage", "Series Books")]
+
+manga_GraphicNovels <- "bestsellers.csv"[data$list_name %in% 
+                              c("Hardcover Graphic Books", "Manga", "Paperback Graphic Books", "Graphic Books and Manga")]
+
+nonfiction <- "bestsellers.csv"[data$list_name %in% 
+                              c("Hardcover Nonfiction", "Paperback Nonfiction", "Combined Print Nonfiction", "E-Book Nonfiction", "Combined Print and E-Book Nonfiction", "Race and Civil Rights", "Hardcover Political Books", "Science", "Audio Nonfiction", "Sports", "Celebrities", "Travel", "Expeditions Disasters and Adventures", "Indigenous Americans", "Culture")]
+
+younger_audiences <- "bestsellers.csv"[data$list_name %in% 
+                              c("Picture Books","Chapter Books","Young Adult","Childrens Middle Grade","Middle Grade Paperback Monthly", "Young Adult Paperback Monthly","Childrens Middle Grade E-Book", "Childrens Middle Grade Hardcover", "Childrens Middle Grade Paperback", "Young Adult E-Book", "Young Adult Hardcover", "Young Adult Paperback")]
+
+self_imporovement <- "bestsellers.csv"[data$list_name %in% 
+                              c("Hardcover Advice", "Paperback Advice", "Advice How-To and Miscellaneous", "Relationships", "Religion Spirituality and Faith", "Paperback Business Books", "Paperback Business Books", "Food and Fitness", "Business Books", "Fashion Manners and Customs", "Family", "Health", "Education")]
+
+other <- "bestsellers.csv"[data$list_name %in% 
+                             c("Mass Market Paperback", "Mass Market Monthly", "Humor", "Paperback Books", "Games and Activities", "Crime and Punishment", "Animals")]              
+```
+* This data is going to be used to look at intended audiences based on assigned categories as well as the longevity of the books in order to see if there is a difference spoke as a group and reviewed the lists names from the categories and grouped them together. Elizabeth suggested a color coded scatter plot with each category being assigned a different color in order to visualize this data. Lucas suggested that we make a swarm plot instead to help visualize the different categories more separately. Alexis suggested doing a correlation matrix with all the data when we finish.
+``` {r, attempting the swarm plot}
+install.packages("beeswarm")
+library(beeswarm)
+beeswarm(fiction)
+```
+## I need to update my r markdown, just want to make sure I have some documentation that I did work incase it crashes
