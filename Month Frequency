@@ -33,7 +33,7 @@ month_frequency <- bestsellers %>%
 print(month_frequency)
 
 # Plot a bar chart of bestseller frequency by month
-ggplot(month_frequency, aes(x = month, y = count, fill = month)) +
+ggplot(month_frequency, aes(x = month, y = count, fill = month)) + 
   geom_bar(stat = "identity") +
   labs(title = "Frequency of Bestsellers by Month",
        x = "Month",
@@ -46,17 +46,24 @@ updated_categories <- read.csv("Updated_Bestsellers_Data.csv")
 
 View(updated_categories)
 
+# Stacked bar
+
+```{r}
+updated_categories <- read.csv("Updated_Bestsellers_Data_Cleaned.csv")
+
+View(updated_categories)
+
 
 library(ggplot2)
 library(dplyr)
 library(lubridate)
 
 # Load the updated dataset
-data <- read.csv("Updated_Bestsellers_Data.csv", stringsAsFactors = FALSE)
+data <- read.csv("Updated_Bestsellers_Data_Cleaned.csv", stringsAsFactors = FALSE)
 
 # Convert the published_date column to Date format and extract the month
 data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
-data$month <- format(data$published_date, "%B")  # full month name
+data$month <- format(data$published_date, "%B")  # Extract full month name
 
 # Order months correctly
 data$month <- factor(data$month, levels = month.name)
@@ -70,3 +77,72 @@ ggplot(data, aes(x = month, fill = New_Category)) +
        y = "Count of Bestsellers",
        fill = "Category") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+# Heat map - category per months
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Load the dataset
+data <- read.csv("Updated_Bestsellers_Data_Cleaned.csv", stringsAsFactors = FALSE)
+
+# Convert date column and extract month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Count occurrences of each category per month
+heatmap_data <- data %>%
+  count(month, New_Category)
+
+# Create heatmap
+ggplot(heatmap_data, aes(x = month, y = New_Category, fill = n)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  theme_minimal() +
+  labs(title = "Heatmap of Bestsellers by Month and Category", 
+       x = "Month", 
+       y = "Category", 
+       fill = "Count") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+# Stacked Area Chart - trend of category dominance across months
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Load the dataset
+data <- read.csv("Updated_Bestsellers_Data_Cleaned.csv", stringsAsFactors = FALSE)
+
+# Convert date column and extract month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Count occurrences of each category per month
+area_chart_data <- data %>%
+  count(month, New_Category)
+
+# Create stacked area chart
+ggplot(area_chart_data, aes(x = month, y = n, fill = New_Category, group = New_Category)) +
+  geom_area(position = "stack", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Stacked Area Chart of Bestsellers by Month",
+       x = "Month",
+       y = "Count of Bestsellers",
+       fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
