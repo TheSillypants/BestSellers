@@ -1,44 +1,39 @@
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse)
-library(readr)
-library(dplyr)
 
-bestsellers <- read.csv("bestsellers 2010-2019 .csv")
-print(bestsellers)
-
+# MONTH OF PUBLICATION FOR BEST SELLERS (NOT LOOKING AT CATEGORIES) - using Lucas' data 
+```{r}
 # Load necessary libraries
-library(tidyverse)
+library(ggplot2)
+library(dplyr)
 library(lubridate)
 
-
-# Check the structure and a sample of the published_date column
-glimpse(bestsellers)
-head(bestsellers$published_date)
+# Load the dataset
+data <- read.csv("Updated_Bestsellers_Data_Cleaned.csv", stringsAsFactors = FALSE)
 
 # Convert published_date to Date format
-bestsellers$published_date <- mdy(bestsellers$published_date)  # Use mdy() for MM/DD/YY format
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
 
-# Extract only the month from the published_date column
-bestsellers$month <- format(bestsellers$published_date, "%m")  # Extracts as two-digit month
+# Extract month name from published_date
+data$month <- format(data$published_date, "%B")
 
-# Count the frequency of books published in each month
-month_frequency <- bestsellers %>%
+# Order months correctly
+data$month <- factor(data$month, levels = month.name, ordered = TRUE)
+
+# Count number of books published per month
+monthly_counts <- data %>%
   group_by(month) %>%
-  summarise(count = n()) %>%
-  arrange(desc(count))
+  summarise(count = n())
 
-# Print the frequency table
-print(month_frequency)
-
-# Plot a bar chart of bestseller frequency by month
-ggplot(month_frequency, aes(x = month, y = count, fill = month)) + 
-  geom_bar(stat = "identity") +
-  labs(title = "Frequency of Bestsellers by Month",
+# Create bar chart
+ggplot(monthly_counts, aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Frequency of Bestseller Books Released Per Month",
        x = "Month",
        y = "Number of Bestsellers") +
-  theme_minimal() 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # DISTRIBUTION OF BESTSELLERS BASED ON MONTH/CATEGORIES
 
