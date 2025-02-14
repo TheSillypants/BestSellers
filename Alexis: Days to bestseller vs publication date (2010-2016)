@@ -1,0 +1,27 @@
+nyt_bestseller <- read.csv("NYT_best_seller .csv", stringsAsFactors = FALSE)
+
+# Filter for fiction books (assuming fiction-related categories contain 'Fiction' in 'list_name')
+fiction_df <- subset(nyt_bestseller, grepl("Fiction", list_name, ignore.case = TRUE))
+
+# Convert 'bestsellers_date' and 'published_date' to Date format
+fiction_df$bestsellers_date <- as.Date(fiction_df$bestsellers_date, format="%m/%d/%y")
+fiction_df$published_date <- as.Date(fiction_df$published_date, format="%m/%d/%y")
+
+# Filter for books published between 2010 and 2016
+fiction_df <- subset(fiction_df, format(published_date, "%Y") >= 2010 & format(published_date, "%Y") <= 2016)
+
+# Calculate time difference in days between publication and best seller date
+fiction_df$days_to_best_seller <- as.numeric(difftime(fiction_df$bestsellers_date, fiction_df$published_date, units="days"))
+
+# Create improved scatter plot with trend line
+ggplot(fiction_df, aes(x = published_date, y = days_to_best_seller)) +
+  geom_point(aes(color = days_to_best_seller), alpha = 0.6, size = 2) +  # Add color gradient based on days
+  geom_smooth(method = "loess", se = TRUE, color = "red", size = 1) +   # Add trend line (LOESS)
+  scale_color_gradient(low = "blue", high = "red") +                     # Gradient from blue (low) to red (high)
+  scale_x_date(labels = date_format("%Y"), breaks = "1 year") +          # Format x-axis to show years
+  labs(title = "Days to Bestseller vs. Publication Date (2010-2016)",
+       x = "Publication Date",
+       y = "Days to Become Bestseller",
+       color = "Days to Bestseller") +
+  theme_minimal(base_size = 14) +                                        # Clean theme with larger text
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
