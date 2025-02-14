@@ -1,0 +1,162 @@
+---
+title: "Intro to Data Science - Project 1"
+output: html_document
+date: "2025-02-12"
+---
+
+
+Just loading the data into a dataframe in R
+```{r}
+use('tidyverse')
+data <- read.csv("bestsellers.csv")
+print(data)
+```
+Just some data exploration - by making a table and then converting it back into a dataframe, I can check to see how many times each ISBN occurs. Each occurance of an ISBN is a week that the corresponding book was on the list, and using the code in the the third line I can find the row that contains the highest number of weeks that book was on the list. The last line just allows me to sort by list name, so that I can explore what books are in each list
+```{r}
+n_occur <- data.frame(table(data$isbn13))
+n_occur[n_occur$Freq > 0,]
+print(data[data$isbn13 == '9780007279753' & data$weeks_on_list == 5,])
+print(data[data$list_name == "Sports",])
+```
+This line initializes a dataframe that contains the right variables,  set to something that makes it obvious this row needs to be destroyed ASAP, so I can bind the dataframes created by the for loop in a few blocks to it.
+```{r}
+data_cleaned <- data[data$isbn13 == "" & data$weeks_on_list == 2,]
+for (c in c("weeks_on_list", "price", "rank", "list_name", "published_date", "list_name_encoded", "title", "author", "description", "isbn10", "isbn13", "amazon_product_url")) {
+  data_cleaned[1, c] <- "DELETE"
+}
+print(data_cleaned)
+```
+
+``` {r}
+
+for (row in 1:nrow(n_occur)) {
+  freq <- (n_occur[row, "Freq"])
+  isbn <- (n_occur[row, "Var1"])
+  data_cleaned <- rbind(data_cleaned, data[data$isbn13 == isbn & data$weeks_on_list == freq,])
+}
+print(data_cleaned)
+```
+
+
+
+
+
+DSJDFJDSJF
+```{R}
+row <- 15
+freq <- (n_occur[row, "Freq"])
+isbn <- (n_occur[row, "Var1"])
+print(isbn)
+print(freq)
+print(data[data$isbn13 == isbn & data$weeks_on_list == freq,])
+
+```
+
+For some reason, this gives a dataframe that doesn't exist. Let's look at the data to see why
+
+```{r}
+print(data[data$isbn13 == 9780060852580,])
+```
+Well, that explains why. The dataset is missing a lot of data, specifically the first couple times that a book was on the list. This doesn't affect our results at all, but it does mean that my original assumption, that every time an isbn occurs in the dataframe is a week on the list, is inaccurate. That means that I'll need a different approach for cleaning out the duplicates. 
+
+
+## PLAN:
+ - Use the above method to get a dataframe with all of the instances of an isbn
+ - Find the row that has the maximum weeks on list
+ - Then, either:
+    - Mark that row, (add something to a separate columnn) and drop all rows that don't have that mark, or
+    - Export just those rows to another dataframe, leaving everything else 
+    
+This code, which is a test of my proposed method (second bullet point) can consistently return the right row of the dataframe, and will get the highest number of weeks on the list instead of presuming that the number of instances is equal to the number of weeks on the list, which should be true, but isn't. The code also includes a check to make sure that if the same book was on multiple lists, it gets the maximum weeks per list. The code also makes sure every book has an ISBN - only one book has a blank ISBN, so i set the code up to input it 
+```{r}
+
+
+row <- 15
+isbn <- ""
+all_instances <- data[data$isbn13 == isbn,]
+print(isbn)
+print(all_instances)
+if ( length(unique(all_instances$list_name_encoded)) == 1 ) {
+  max_row_num <- which.max(all_instances$weeks_on_list)
+  max_row <- all_instances[max_row_num,]
+  if (max_row$isbn13 == "") {
+    max_row$isbn13 <- "9780990695196"
+  }
+  print(max_row)
+} else {
+  print(unique(all_instances$list_name_encoded))
+  for (x in unique(all_instances$list_name_encoded)) {
+    print(x)
+    all_instances_lim <- all_instances[all_instances$list_name_encoded == x,]
+    max_row_num <- which.max(all_instances_lim$weeks_on_list)
+    print(max_row_num)
+    max_row <- all_instances_lim[max_row_num,]
+    if (max_row$isbn13 == "") {
+      max_row$isbn13 <- "9780990695196"
+    }
+    print(max_row)
+  }
+}
+
+
+
+```
+This goes in it's own code block so that  it's always run together. Otherwise, duplicates of each book end up in the cleaned list, which is quite literally the exact problem that this is supposed to fix. Also, the cleaning includes a check to make sure that the number of weeks on the list isn't 0, where it shouldn't be included, and a check for if the isbn is blank - this is only true for one book, so I just manually googled the isbn13 for it and the for loop will add it.
+```{r}
+# Quickly reinitialize data_cleaned so that prior testing code doesn't interfere
+data_cleaned <- data[data$isbn13 == "" & data$weeks_on_list == 2,]
+for (c in c("weeks_on_list", "price", "rank", "list_name", "published_date", "list_name_encoded", "title", "author", "description", "isbn10", "isbn13", "amazon_product_url")) {
+  data_cleaned[1, c] <- "DELETE"
+}
+
+# Actually clean the duplicate ISBN's
+for (row in 1:nrow(n_occur)) {
+  isbn <- (n_occur[row, "Var1"])
+  all_instances <- data[data$isbn13 == isbn,]
+  ## Check for if the book was on one list
+  if ( length(unique(all_instances$list_name_encoded)) == 1 ) {
+    max_row_num <- which.max(all_instances$weeks_on_list)
+    max_row <- all_instances[max_row_num,]
+    ## Add missing ISBN
+    if (max_row$isbn13 == "") {
+      max_row$isbn13 <- "9780990695196"
+    }
+    ## Add to data_cleaned if on list for at least one week
+    if ( max_row$weeks_on_list != 0) {
+      data_cleaned <- rbind(data_cleaned, max_row)
+    }
+  } else {
+    ## If book is in multiple lists, add entry for each list
+    for (x in unique(all_instances$list_name_encoded)) {
+      ## divide into dataframe based on list
+      all_instances_ls <- all_instances[all_instances$list_name_encoded == x,]
+      ## find most weeks book was on specific list
+      max_row_num <- which.max(all_instances_ls$weeks_on_list)
+      max_row <- all_instances_ls[max_row_num,]
+      ## Add missing ISBN
+      if (max_row$isbn13 == "") {
+        max_row$isbn13 <- "9780990695196"
+      }
+      ## add to data_cleaned if on list for at least one week
+      if (max_row$weeks_on_list != 0) {
+        data_cleaned <- rbind(data_cleaned, max_row)
+      }
+    }
+  }
+}
+```
+
+Removing the first row to get rid of the "delete" row that was always there as a placeholder
+```{r}
+data_cleaned <- data_cleaned[-1,]
+print(data_cleaned)
+write.csv(data_cleaned, "~/dataclean.csv")
+```
+
+Reload data_cleaned to avoid having to rerun the cleaning
+```{r}
+data_cleaned <- read.csv("~/dataclean.csv")
+print(data_cleaned)
+print(data_cleaned[data_cleaned$weeks_on_list == 0,])
+print(data_cleaned[data_cleaned$isbn13 == "",])
+```
