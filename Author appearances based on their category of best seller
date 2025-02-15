@@ -1,0 +1,121 @@
+# Count for each author on best seller list - Using Lucas' Data (CLEANED)
+```{r}
+nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
+
+# Count occurrences of each author 
+author_counts <- nyt_authors %>% 
+  group_by(author) %>% 
+  summarise(count = n ()) %>% 
+  arrange(desc(count)) 
+
+print(author_counts) 
+
+
+# Author and their respective catgeory 
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(tibble)
+
+# Load dataset
+nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
+
+# Count occurrences of each author within each category
+author_counts <- nyt_authors %>% 
+  group_by(author, New_Category) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(desc(count))
+
+# Convert to tibble for better display
+author_tibble <- as_tibble(author_counts)
+
+# Print the tibble
+print(author_tibble)
+View(author_tibble)
+``` 
+
+# Visualization of top 20 authors overall 
+```{r}
+top_authors <- author_counts %>% top_n(20, count)
+
+ggplot(top_authors, aes(x = reorder(author, count), y = count, fill = count)) +
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  scale_fill_gradient(low = "blue", high = "red") + 
+  labs(title = "Top 20 Authors on NYT Bestseller List", 
+       x = "Author", 
+       y = "Number of Appearances") + 
+  theme_minimal(base_size = 14)
+``` 
+
+# Top 10 Authors in Each Category (not excluding if multiple authors have same count)
+```{r echo=TRUE, fig.height=20, fig.width=15}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Load dataset
+nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
+
+# Count occurrences of each author within each new category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Select top 20 authors per category
+top_authors <- author_counts %>%
+  group_by(New_Category) %>%
+  slice_max(order_by = count, n = 10)
+
+# Create bar chart with facet wrap
+ggplot(top_authors, aes(x = reorder(author, count), y = count, fill = count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for readability
+  scale_fill_gradient(low = "blue", high = "red") +  # Color gradient
+  facet_wrap(~ New_Category, scales = "free_y") +  # Separate plots per category
+  labs(title = "Top 10 Authors in Each Category",
+       x = "Author",
+       y = "Number of Appearances",
+       fill = "Count") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.y = element_text(size = 8))
+
+``` 
+
+# Using with_ties = FALSE to ensure exactly 10 authors per category 
+```{r fig.height=20, fig.width=15}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(forcats)  # Needed for correct ordering within facets
+
+# Load dataset
+nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
+
+# Count occurrences of each author within each new category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Select top 10 authors per category, ensuring exactly 10 per group
+top_authors <- author_counts %>%
+  group_by(New_Category) %>%
+  slice_max(order_by = count, n = 10, with_ties = FALSE) %>%
+  ungroup()  # Remove grouping for plotting
+
+# Create bar chart with facet wrap, ensuring correct ordering within facets
+ggplot(top_authors, aes(x = forcats::fct_reorder(author, count, .desc = TRUE), y = count, fill = count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for readability
+  scale_fill_gradient(low = "blue", high = "red") +  # Color gradient
+  facet_wrap(~ New_Category, scales = "free_y") +  # Separate plots per category
+  labs(title = "Top 10 Authors in Each Category",
+       x = "Author",
+       y = "Number of Appearances",
+       fill = "Count") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.y = element_text(size = 8))
+
+```
