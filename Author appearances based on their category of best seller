@@ -121,3 +121,33 @@ ggplot(top_authors, aes(x = forcats::fct_reorder(author, count, .desc = TRUE), y
   theme(axis.text.x = element_text(size = 12))
 
 ```
+
+# Count of authors appearing in multiple categories with bestsellers 
+```{r echo=TRUE, fig.height=20, fig.width=20}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(forcats)
+
+# Load dataset
+nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
+
+# Count occurrences of each author within each category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Identify authors appearing in more than one category and rank by total count
+multi_category_authors <- author_counts %>%
+  group_by(author) %>%
+  summarise(category_count = n(), total_count = sum(count)) %>%
+  filter(category_count > 1) %>%
+  arrange(desc(total_count)) %>%
+  slice_max(order_by = total_count, n = 10)  # Select top 10 multi-category authors
+
+
+print(multi_category_authors)
+
+```
+Shows Top 11 authors (since Christine Feehan and Lee Child both have 54 books in bestseller list) who have bestsellers in more than 1 category. 
