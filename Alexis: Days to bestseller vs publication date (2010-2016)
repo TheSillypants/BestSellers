@@ -25,3 +25,23 @@ ggplot(fiction_df, aes(x = published_date, y = days_to_best_seller)) +
        color = "Days to Bestseller") +
   theme_minimal(base_size = 14) +                                        # Clean theme with larger text
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+# ABBREVIATED X AXIS TO SHOW MONTH AND YEAR 
+
+```{r}
+library(ggplot2)
+library(scales)
+
+ggplot(nyt_bestseller, aes(x = published_date, y = days_to_best_seller)) +
+  geom_point(aes(color = days_to_best_seller), alpha = 0.6, size = 2) +  
+  geom_smooth(method = "loess", se = TRUE, color = "red", size = 1) +   
+  scale_color_gradient(low = "blue", high = "red") +                     
+  scale_x_date(labels = date_format("%b %Y"), breaks = date_breaks("3 months")) +  # show abbreviated months and years
+  labs(title = "Days to Bestseller vs. Publication Date (2010-2016)",
+       x = "Publication Date",
+       y = "Days to Become Bestseller",
+       color = "Days to Bestseller") +
+  theme_minimal(base_size = 14) +                                        
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
