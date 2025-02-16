@@ -30,5 +30,12 @@ ggplot(publisher_counts_2010_2016, aes(x = reorder(publisher, n), y = n)) +
        subtitle = "Data from 2010-2016",
        x = "Publisher",
        y = "Number of Best Sellers") +
-  theme_minimal()
+  theme_minimal() +
+theme(
+    plot.title = element_text(size = 18, face = "bold"),  # Increase title size
+    axis.title.x = element_text(size = 16),  # Increase x-axis title size
+    axis.title.y = element_text(size = 16),  # Increase y-axis title size
+    axis.text.y = element_text(size = 14),   # Increase y-axis text size (publisher names)
+    axis.text.x = element_text(size = 14)    # Increase x-axis text size
+  )
 ```
