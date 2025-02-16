@@ -1,0 +1,14 @@
+```{r, attempting to make chart by popularity of category}
+# was taking too long to load the new column from alexis, need to change names to include proper data
+# Summarizing category data to include frequency
+category_data <- data %>%
+  count(list_name)
+  
+# making the chart
+ggplot(category_data, aes(x = reorder(list_name, -n), y = n, fill = list_name)) +
+  geom_bar(stat = "identity") +  # Use a bar chart with counts
+  labs(title = "Frequency of Bestsellers by Category",
+       x = "Category",
+       y = "Number of Books") +
+  theme_minimal()
+```
