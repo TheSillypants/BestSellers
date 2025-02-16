@@ -1,0 +1,114 @@
+---
+title: "Best Seller"
+author: "Elizabeth Techeira"
+date: "2025-02-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, inserting packages- Elizabeth}
+library(tidyverse)
+data <- read.csv("bestsellers.csv")
+```
+```{r, cleaning data underneath list_name}
+#pulling list_name categories out
+categories <- unique(data$list_name)
+all_catergories <- length(categories)
+data.frame(categories)
+#installing categories onto my desktop to sort as a group
+write.csv(categories, "~/Desktop/categories.csv")
+```
+* importing a sorted document at some point 
+# ```{r, grouping the categories into larger categories - Elizabeth}
+mutate(category = case_when(
+
+  list_name %in% c("Combined Print and E-Book Fiction","Hardcover Fiction", "Audio Fiction",  "Combined Print Fiction", "Trade Fiction Paperback", "Combined Print Fiction", "E-Book Fiction", "Espionage", "Series Books")) ~ "fiction",
+  
+  list_name %in% c("Hardcover Graphic Books", "Manga", "Paperback Graphic Books", "Graphic Books and Manga") ~ "Manga_GraphicNovels",
+  
+  list_name %in% c("Hardcover Nonfiction", "Paperback Nonfiction", "Combined Print Nonfiction", "E-Book Nonfiction", "Combined Print and E-Book Nonfiction", "Race and Civil Rights", "Hardcover Political Books", "Science", "Audio Nonfiction", "Sports", "Celebrities", "Travel", "Expeditions Disasters and Adventures", "Indigenous Americans", "Culture") ~ "nonfiction",
+ 
+   list_name %in% c("Picture Books","Chapter Books","Young Adult","Childrens Middle Grade","Middle Grade Paperback Monthly", "Young Adult Paperback Monthly","Childrens Middle Grade E-Book", "Childrens Middle Grade Hardcover", "Childrens Middle Grade Paperback", "Young Adult E-Book", "Young Adult Hardcover", "Young Adult Paperback") ~ "younger_audiences",
+  
+  list_name %in% c("Hardcover Advice", "Paperback Advice", "Advice How-To and Miscellaneous", "Relationships", "Religion Spirituality and Faith", "Paperback Business Books", "Paperback Business Books", "Food and Fitness", "Business Books", "Fashion Manners and Customs", "Family", "Health", "Education") ~ "self_improvement",
+  
+  list_name %in% c("Mass Market Paperback", "Mass Market Monthly", "Humor", "Paperback Books", "Games and Activities", "Crime and Punishment", "Animals") ~ "other",
+  
+  TRUE ~ "unknown"
+  )
+```
+
+```{r, using alexis new category data instead of my failed data}
+category_mappings <- list(
+  "Fiction" = c("Combined Print and E-Book Fiction", "Hardcover Fiction", "Audio Fiction", "Combined Print Fiction", "Trade Fiction Paperback", "E-Book Fiction", "Espionage", "Series Books"),
+  
+  "Manga & Graphic Novels" = c("Hardcover Graphic Books", "Manga", "Paperback Graphic Books", "Graphic Books and Manga"),
+  
+  "Nonfiction" = c("Hardcover Nonfiction", "Paperback Nonfiction", "Combined Print Nonfiction", "E-Book Nonfiction", "Combined Print and E-Book Nonfiction", "Race and Civil Rights", "Hardcover Political Books", "Science", "Audio Nonfiction", "Sports", "Celebrities","Travel", "Expeditions Disasters and Adventures", "Indigenous Americans", "Culture"),
+  
+  "Younger Audiences" = c("Picture Books", "Chapter Books", "Young Adult", "Childrens Middle Grade", "Middle Grade Paperback Monthly", "Young Adult Paperback Monthly", "Childrens Middle Grade E-Book", "Childrens Middle Grade Hardcover", "Childrens Middle Grade Paperback", "Young Adult E-Book", "Young Adult Hardcover", "Young Adult Paperback"),
+  
+  "Self-Improvement" = c("Hardcover Advice", "Paperback Advice", "Advice How-To and Miscellaneous", "Relationships", "Religion Spirituality and Faith", "Paperback Business Books", "Food and Fitness", "Business Books", "Fashion Manners and Customs", 
+                         "Family", "Health", "Education"),
+                         
+  "Other" = c("Mass Market Paperback", "Mass Market Monthly", "Humor", "Paperback Books", "Games and Activities", 
+              "Crime and Punishment", "Animals")
+)
+
+# Function to assign categories
+assign_category <- function(list_name) {
+  for (category in names(category_mappings)) {
+    if (list_name %in% category_mappings[[category]]) {
+      return(category)
+    }
+  }
+  return("Uncategorized")
+}
+
+# Apply category assignment to data 
+data$New_Category <- sapply(data$list_name, assign_category)
+
+# Display the updated dataset
+
+View(data)
+```
+
+#```{r, combing the data frame into a new one to make a ggplot- lucas helped originally, had to go and try again}
+df2 <- data %>%
+  select(list_name, category, weeks_on_list)
+# this did not work originally because it did not include my categories, I tweaked how my categories worked and am retesting
+
+
+#This data is going to be used to look at intended audiences based on assigned categories as well as the longevity of the books in order to see if there is a difference spoke as a group and reviewed the lists names from the categories and grouped them together. Elizabeth suggested a color coded scatter plot with each category being assigned a different color in order to visualize this data. Lucas suggested that we make a swarm plot instead to help visualize the different categories more separately. Alexis suggested doing a correlation matrix with all the data when we finish.
+
+```
+
+``` {r, attempting the swarm plot with the help of gg plot}
+library(ggplot2)
+library(ggbeeswarm)
+
+#execution of the beeswarm hopefully
+ggplot(df2, aes(x= New_Category, y= weeks_on_list, color = )) +
+  geom_quasirandom(method = "pseudorandom")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r, attempting to make chart by popularity of category}
+library(tidyverse)
+
+# frequency for categories
+category_data <- df2 %>%
+  count(category)
+  
+# making the chart
+ggplot(category_data, aes(x = reorder(New_Category, -n), y = n, fill = New_Category)) +
+  geom_bar(stat = "identity") +  # Use a bar chart with counts
+  labs(title = "Frequency of Bestsellers by Category",
+       x = "Category",
+       y = "Number of Books") +
+  theme_minimal()
+
+```
