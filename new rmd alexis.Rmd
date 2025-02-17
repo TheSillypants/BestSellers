@@ -1,0 +1,410 @@
+---
+title: "New RMD"
+output: html_document
+date: "2025-02-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(tidyverse)
+library(ggplot2)
+library(readr)
+nyt_bestseller <- read_csv(file.choose("NYT_best_seller .csv"))
+
+# Convert 'bestsellers_date' and 'published_date' to Date format
+nyt_bestseller$bestsellers_date <- as.Date(nyt_bestseller$bestsellers_date, format="%m/%d/%y")
+nyt_bestseller$published_date <- as.Date(nyt_bestseller$published_date, format="%m/%d/%y")
+
+# Filter for books published between 2010 and 2016
+nyt_bestseller <- subset(nyt_bestseller, format(published_date, "%Y") >= 2010 & format(published_date, "%Y") <= 2016)
+
+# Calculate time difference in days between publication and best seller date
+nyt_bestseller$days_to_best_seller <- as.numeric(difftime(nyt_bestseller$bestsellers_date, nyt_bestseller$published_date, units="days"))
+
+# Create improved scatter plot with trend line
+ggplot(nyt_bestseller, aes(x = published_date, y = days_to_best_seller)) +
+  geom_point(aes(color = days_to_best_seller), alpha = 0.6, size = 2) +  # Add color gradient based on days
+  geom_smooth(method = "loess", se = TRUE, color = "red", size = 1) +   
+  scale_color_gradient(low = "blue", high = "red") +                     # Gradient from blue (low) to red (high)
+  scale_x_date(labels = date_format("%Y"), breaks = "1 year") +          # Format x-axis to show months
+  labs(title = "Days to Bestseller vs. Publication Date (2010-2016)",
+       x = "Publication Date",
+       y = "Days to Become Bestseller",
+       color = "Days to Bestseller") +
+  theme_minimal(base_size = 14) +                                        # Clean theme with larger text
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))               # Rotate x-axis labels for readability
+
+```
+This data set only had three categories: Trade Fiction, Mass Market, and Hardcover Fiction. This first graph looks at best sellers published from years 2010-2016, and plots the days until days the books reach bestseller list. The range between publication date and days to bestseller is 14 to 15 days.
+
+# Added month for readability 
+```{r}
+
+ggplot(nyt_bestseller, aes(x = published_date, y = days_to_best_seller)) +
+  geom_point(aes(color = days_to_best_seller), alpha = 0.6, size = 2) +  
+  geom_smooth(method = "loess", se = TRUE, color = "red", size = 1) +   
+  scale_color_gradient(low = "blue", high = "red") +                     
+  scale_x_date(labels = date_format("%b %Y"), breaks = date_breaks("3 months")) +  # show abbreviated months and years
+  labs(title = "Days to Bestseller vs. Publication Date (2010-2016)",
+       x = "Publication Date",
+       y = "Days to Become Bestseller",
+       color = "Days to Bestseller") +
+  theme_minimal(base_size = 14) +                                        
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+library(dplyr)
+print(nyt_bestseller$days_to_best_seller)
+```
+
+
+# Top 10 publishers - Using Alexis' data (Filtered for 2010-2016)
+
+```{r}
+
+# Load required libraries
+library(dplyr)
+
+
+# Read the dataset
+nyt_bestseller <- read_csv(file.choose("NYT_best_seller .csv"))
+
+# Convert 'published_date' to Date format
+nyt_bestseller <- nyt_bestseller %>%
+  mutate(published_date = as.Date(published_date, format="%m/%d/%y"))
+
+# Check date range before filtering
+print(range(nyt_bestseller$published_date, na.rm = TRUE))
+
+# Filter data to only include books published between 2010 and 2016
+df_filtered <- nyt_bestseller %>%
+  filter(published_date >= as.Date("2010-01-01") & published_date <= as.Date("2016-12-31"))
+
+# Count the number of books per publisher
+publisher_counts_2010_2016 <- df_filtered %>%
+  count(publisher, name = "n") %>%
+  arrange(desc(n))
+
+# Ensure data exists before saving
+print(dim(publisher_counts_2010_2016))
+print(head(publisher_counts_2010_2016))
+```
+# Visualization for Publisher counts in NYT Best Sellers - Alexis' Data (2010-2016)
+
+```{r echo=TRUE, fig.height=30, fig.width=15}
+
+ggplot(publisher_counts_2010_2016, aes(x = reorder(publisher, n), y = n)) + 
+  geom_bar(stat = "identity", fill = "skyblue") + 
+  coord_flip() + 
+  labs(title = "Publisher Counts in NYT Best Sellers", 
+       subtitle = "Data from 2010-2016",
+       x = "Publisher",
+       y = "Number of Best Sellers") +
+  theme_minimal() +
+    theme(
+    plot.title = element_text(size = 18, face = "bold"),  # Increase title size
+    axis.title.x = element_text(size = 16),  # Increase x-axis title size
+    axis.title.y = element_text(size = 16),  # Increase y-axis title size
+    axis.text.y = element_text(size = 14),   # Increase y-axis text size (publisher names)
+    axis.text.x = element_text(size = 14)    # Increase x-axis text size
+  )
+```
+
+
+
+
+# Top 10 Publishers 2010-2016
+
+```{r}
+
+top_publishers <- publisher_counts_2010_2016 %>%
+  arrange(desc(n)) %>%
+  head(10)  # Keep only the top 10 publishers
+
+# Create the ggplot visualization
+ggplot(top_publishers, aes(x = reorder(publisher, n), y = n)) + 
+  geom_bar(stat = "identity", fill = "red") + 
+  coord_flip() + 
+  labs(title = "Top 10 Publishers in NYT Best Sellers", 
+       subtitle = "Data from 2010-2016",
+       x = "Publisher",
+       y = "Number of Best Sellers") +
+  theme_minimal()
+
+```
+
+
+Grand Central, Bantam, Berkley, Vintage, Ballantine, Putnam, Dell, Little, Brown, Simon & Schuster, Knopf have most NYT best sellers from 2010-2016 
+
+# Month of publication for best sellers (not looking at categories), using Lucas' data. 
+
+
+```{r}
+
+# Load the dataset
+data <- read_csv(file.choose("dataclean_updated.csv"))
+
+# Convert published_date to Date format
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+
+# Extract month name from published_date
+data$month <- format(data$published_date, "%B")
+
+# Order months 
+data$month <- factor(data$month, levels = month.name, ordered = TRUE)
+
+# Count number of books published per month
+monthly_counts <- data %>%
+  group_by(month) %>%
+  summarise(count = n())
+
+# Create bar chart
+ggplot(monthly_counts, aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Frequency of Bestseller Books Released Per Month",
+       x = "Month",
+       y = "Number of Bestsellers") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+# Stacked Area Chart of categories by month with clean data
+
+```{r}
+
+
+# Convert date column and extract month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Count occurrences of each category per month
+area_chart_data <- data %>%
+  count(month, New_Category)
+
+# Create stacked area chart
+ggplot(area_chart_data, aes(x = month, y = n, fill = New_Category, group = New_Category)) +
+  geom_area(position = "stack", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Stacked Area Chart of Bestsellers by Month",
+       x = "Month",
+       y = "Count of Bestsellers",
+       fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+Fiction, Manga/Graphic Novels, and Nonfiction categories have the most books on the bestseller list year round compared to the three other categories. 
+
+# Heat map of Bestsellers by month and category with clean data
+
+```{r}
+
+# Convert date column and extract month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Count occurrences of each category per month
+heatmap_data <- data %>%
+  count(month, New_Category)
+
+# Create heatmap
+ggplot(heatmap_data, aes(x = month, y = New_Category, fill = n)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  theme_minimal() +
+  labs(title = "Heatmap of Bestsellers by Month and Category", 
+       x = "Month", 
+       y = "Category", 
+       fill = "Count") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+There is little seasonality for books categorized as Self-Improvement and Other. 
+Suprisingly, books categorized as Young Audiences peak on the bestseller list in October. Fiction books peak in March, April, and September and are most frequently on the bestseller list year round compared to other categories. 
+
+# Distribution of bestellers by month and category with clean data
+
+```{r}
+
+
+# Convert the published_date column to Date format and extract the month
+data$published_date <- as.Date(data$published_date, format = "%m/%d/%y")
+data$month <- format(data$published_date, "%B")  
+
+# Order months correctly
+data$month <- factor(data$month, levels = month.name)
+
+# Create the visualization
+ggplot(data, aes(x = month, fill = New_Category)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(title = "Distribution of Bestsellers by Month",
+       x = "Month",
+       y = "Count of Bestsellers",
+       fill = "Category") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+``` 
+
+Show distribution of each category per month. Can see that Younger Audiences, Self-Improvement, and Other have least amount of bestsellers year round. Limited seasonality in all categories. 
+
+
+# Count for each author on best seller list - Using Lucas' Data (CLEANED)
+
+```{r}
+nyt_authors <- read.csv(file.choose("dataclean_updated.csv"))
+
+# Count occurrences of each author 
+author_counts <- nyt_authors %>% 
+  group_by(author) %>% 
+  summarise(count = n ()) %>% 
+  arrange(desc(count)) 
+
+print(author_counts)
+``` 
+
+# Author and their respective catgeory
+
+```{r}
+
+
+# Count occurrences of each author within each category
+author_counts <- nyt_authors %>% 
+  group_by(author, New_Category) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(desc(count))
+
+# Convert to tibble for better display
+author_tibble <- as_tibble(author_counts)
+
+# Print the tibble
+print(author_tibble)
+
+```
+
+# Visualization of top 20 authors overall
+
+```{r}
+top_authors <- author_counts %>% top_n(20, count)
+
+ggplot(top_authors, aes(x = reorder(author, count), y = count, fill = count)) +
+  geom_bar(stat = "identity") + 
+  coord_flip() + 
+  scale_fill_gradient(low = "blue", high = "red") + 
+  labs(title = "Top 20 Authors on NYT Bestseller List", 
+       x = "Author", 
+       y = "Number of Appearances") + 
+  theme_minimal(base_size = 14)
+``` 
+
+
+# Top 10 Authors in Each Category (not excluding if multiple authors have same count)
+
+```{r echo=TRUE, fig.height=20, fig.width=15}
+
+
+
+# Count occurrences of each author within each new category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Select top 20 authors per category
+top_authors <- author_counts %>%
+  group_by(New_Category) %>%
+  slice_max(order_by = count, n = 10)
+
+# Create bar chart with facet wrap
+ggplot(top_authors, aes(x = reorder(author, count), y = count, fill = count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for readability
+  scale_fill_gradient(low = "blue", high = "red") +  # Color gradient
+  facet_wrap(~ New_Category, scales = "free_y") +  # Separate plots per category
+  labs(title = "Top 10 Authors in Each Category",
+       x = "Author",
+       y = "Number of Appearances",
+       fill = "Count") +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.y = element_text(size = 12)) +
+  theme(axis.text.x = element_text(size = 12))
+
+``` 
+
+# Using with_ties = FALSE to ensure exactly 10 authors per category
+
+```{r fig.height=20, fig.width=15}
+
+library(forcats) 
+
+
+# Count occurrences of each author within each new category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Select top 10 authors per category, ensuring exactly 10 per group
+top_authors <- author_counts %>%
+  group_by(New_Category) %>%
+  slice_max(order_by = count, n = 10, with_ties = FALSE) %>%
+  ungroup()  # Remove grouping for plotting
+
+# Create bar chart with facet wrap, ensuring correct ordering within facets
+ggplot(top_authors, aes(x = forcats::fct_reorder(author, count, .desc = TRUE), y = count, fill = count)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for readability
+  scale_fill_gradient(low = "blue", high = "red") +  # Color gradient
+  facet_wrap(~ New_Category, scales = "free_y") +  # Separate plots per category
+  labs(title = "Top 10 Authors in Each Category",
+       x = "Author",
+       y = "Number of Appearances",
+       fill = "Count") +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.y = element_text(size = 12)) +
+  theme(axis.text.x = element_text(size = 12))
+
+```
+
+James Patterson and Danielle Steel appears in multiple categories as a top author. 
+
+
+```{r echo=TRUE, fig.height=20, fig.width=20}
+
+
+
+# Count occurrences of each author within each category
+author_counts <- nyt_authors %>% 
+  group_by(New_Category, author) %>% 
+  summarise(count = n(), .groups = "drop") %>% 
+  arrange(New_Category, desc(count))
+
+# Identify authors appearing in more than one category and rank by total count
+multi_category_authors <- author_counts %>%
+  group_by(author) %>%
+  summarise(category_count = n(), total_count = sum(count)) %>%
+  filter(category_count > 1) %>%
+  arrange(desc(total_count)) %>%
+  slice_max(order_by = total_count, n = 10)  # Select top 10 multi-category authors
+
+
+print(multi_category_authors)
+
+```
+
+Top 11 authors (since Christine Feehan and Lee Child both have 54 books in bestseller list) who have bestsellers in more than 1 category. 
