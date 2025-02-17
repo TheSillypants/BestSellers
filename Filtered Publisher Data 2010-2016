@@ -1,4 +1,4 @@
-# Load required libraries
+
 library(dplyr)
 library(readr)
 
@@ -38,4 +38,22 @@ theme(
     axis.text.y = element_text(size = 14),   # Increase y-axis text size (publisher names)
     axis.text.x = element_text(size = 14)    # Increase x-axis text size
   )
+```
+Top 10 Publishers 
+```{r}
+
+top_publishers <- publisher_counts_2010_2016 %>%
+  arrange(desc(n)) %>%
+  head(10)  # Keep only the top 10 publishers
+
+# Create the ggplot visualization
+ggplot(top_publishers, aes(x = reorder(publisher, n), y = n)) + 
+  geom_bar(stat = "identity", fill = "red") + 
+  coord_flip() + 
+  labs(title = "Top 10 Publishers in NYT Best Sellers", 
+       subtitle = "Data from 2010-2016",
+       x = "Publisher",
+       y = "Number of Best Sellers") +
+  theme_minimal()
+
 ```
