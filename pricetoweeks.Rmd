@@ -15,5 +15,5 @@ library(ggplot2)
 
 data <- read_csv("NYT_best_seller.csv")
 ggplot(data, aes(y = price, x = weeks_on_list)) +
-  geom_bar(stat = 'identity')
+  geom_bar(stat = 'identity', width = 5)
 ```
