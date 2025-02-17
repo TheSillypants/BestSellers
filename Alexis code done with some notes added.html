@@ -2,9 +2,7 @@
 
 ```{r}
 library(tidyverse)
-library(ggplot2)
 library(dplyr)
-
 library(ggplot2)
 library(scales)
 
@@ -44,11 +42,6 @@ ggplot(fiction_df, aes(x = published_date, y = days_to_best_seller)) +
 # Includes all categories in Alexis' data
 
 ```{r}
-# Load necessary libraries
-library(ggplot2)
-library(scales)  # For formatting dates
-
-
 
 # Convert 'bestsellers_date' and 'published_date' to Date format
 nyt_bestseller$bestsellers_date <- as.Date(nyt_bestseller$bestsellers_date, format="%m/%d/%y")
@@ -77,8 +70,6 @@ ggplot(nyt_bestseller, aes(x = published_date, y = days_to_best_seller)) +
   This graph looks at Hardcover Fiction,Trade Fiction, and Mass Market. There is similiar range of days between publication date and reaching bestseller list. 
 
 ```{r}
-library(ggplot2)
-library(scales)
 
 ggplot(nyt_bestseller, aes(x = published_date, y = days_to_best_seller)) +
   geom_point(aes(color = days_to_best_seller), alpha = 0.6, size = 2) +  
@@ -126,7 +117,7 @@ print(publisher_counts_2010_2016)
   # Visualization for Publisher counts in NYT Best Sellers - Alexis' Data (2010-2016)
 
 ```{r echo=TRUE, fig.height=30, fig.width=15}
-library(ggplot2)
+
 ggplot(publisher_counts_2010_2016, aes(x = reorder(publisher, n), y = n)) + 
   geom_bar(stat = "identity", fill = "skyblue") + 
   coord_flip() + 
@@ -292,8 +283,7 @@ print(author_counts)
   # Author and their respective catgeory
 
 ```{r}
-# Load necessary libraries
-library(dplyr)
+
 library(tibble)
 
 # Load dataset
@@ -329,9 +319,7 @@ ggplot(top_authors, aes(x = reorder(author, count), y = count, fill = count)) +
   # Using with_ties = FALSE to ensure exactly 10 authors per category
 
 ```{r fig.height=20, fig.width=15}
-# Load necessary libraries
-library(ggplot2)
-library(dplyr)
+
 library(forcats) 
 
 # Load dataset
@@ -366,10 +354,7 @@ ggplot(top_authors, aes(x = forcats::fct_reorder(author, count, .desc = TRUE), y
 ```
   James Patterson and Danielle Steel appears in multiple categories as a top author. 
 ```{r echo=TRUE, fig.height=20, fig.width=20}
-# Load necessary libraries
-library(dplyr)
-library(ggplot2)
-library(forcats)
+
 
 # Load dataset
 nyt_authors <- read.csv("dataclean_updated.csv", stringsAsFactors = FALSE)
